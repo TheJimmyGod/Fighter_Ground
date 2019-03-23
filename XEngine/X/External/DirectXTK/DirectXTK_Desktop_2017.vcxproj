@@ -59,7 +59,6 @@
     <ClCompile Include="Src\BasicPostProcess.cpp" />
     <ClCompile Include="Src\CommonStates.cpp" />
     <ClCompile Include="Src\DDSTextureLoader.cpp" />
-    <ClCompile Include="Src\DebugEffect.cpp" />
     <ClCompile Include="Src\DGSLEffect.cpp" />
     <ClCompile Include="Src\DGSLEffectFactory.cpp" />
     <ClCompile Include="Src\DualPostProcess.cpp" />
@@ -79,8 +78,6 @@
     <ClCompile Include="Src\ModelLoadVBO.cpp" />
     <ClCompile Include="Src\Mouse.cpp" />
     <ClCompile Include="Src\NormalMapEffect.cpp" />
-    <ClCompile Include="Src\PBREffect.cpp" />
-    <ClCompile Include="Src\PBREffectFactory.cpp" />
     <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -200,22 +197,6 @@
     <None Include="Src\Shaders\Compiled\BasicEffect_VSBasicVertexLightingVc.pdb" />
     <None Include="Src\Shaders\Compiled\BasicEffect_VSBasicVertexLightingVcBn.inc" />
     <None Include="Src\Shaders\Compiled\BasicEffect_VSBasicVertexLightingVcBn.pdb" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_PSHemiAmbient.inc" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_PSHemiAmbient.pdb" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_PSRGBBiTangents.inc" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_PSRGBBiTangents.pdb" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_PSRGBNormals.inc" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_PSRGBNormals.pdb" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_PSRGBTangents.inc" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_PSRGBTangents.pdb" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_VSDebug.inc" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_VSDebug.pdb" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_VSDebugBn.inc" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_VSDebugBn.pdb" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_VSDebugVc.inc" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_VSDebugVc.pdb" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_VSDebugVcBn.inc" />
-    <None Include="Src\Shaders\Compiled\DebugEffect_VSDebugVcBn.pdb" />
     <None Include="Src\Shaders\Compiled\DGSLEffect_main.inc" />
     <None Include="Src\Shaders\Compiled\DGSLEffect_main.pdb" />
     <None Include="Src\Shaders\Compiled\DGSLEffect_main1Bones.inc" />
@@ -320,24 +301,6 @@
     <None Include="Src\Shaders\Compiled\NormalMapEffect_VSNormalPixelLightingTxVc.pdb" />
     <None Include="Src\Shaders\Compiled\NormalMapEffect_VSNormalPixelLightingTxVcBn.inc" />
     <None Include="Src\Shaders\Compiled\NormalMapEffect_VSNormalPixelLightingTxVcBn.pdb" />
-    <None Include="Src\Shaders\Compiled\PBREffect_PSConstant.inc" />
-    <None Include="Src\Shaders\Compiled\PBREffect_PSConstant.pdb" />
-    <None Include="Src\Shaders\Compiled\PBREffect_PSTextured.inc" />
-    <None Include="Src\Shaders\Compiled\PBREffect_PSTextured.pdb" />
-    <None Include="Src\Shaders\Compiled\PBREffect_PSTexturedEmissive.inc" />
-    <None Include="Src\Shaders\Compiled\PBREffect_PSTexturedEmissive.pdb" />
-    <None Include="Src\Shaders\Compiled\PBREffect_PSTexturedEmissiveVelocity.inc" />
-    <None Include="Src\Shaders\Compiled\PBREffect_PSTexturedEmissiveVelocity.pdb" />
-    <None Include="Src\Shaders\Compiled\PBREffect_PSTexturedVelocity.inc" />
-    <None Include="Src\Shaders\Compiled\PBREffect_PSTexturedVelocity.pdb" />
-    <None Include="Src\Shaders\Compiled\PBREffect_VSConstant.inc" />
-    <None Include="Src\Shaders\Compiled\PBREffect_VSConstant.pdb" />
-    <None Include="Src\Shaders\Compiled\PBREffect_VSConstantBn.inc" />
-    <None Include="Src\Shaders\Compiled\PBREffect_VSConstantBn.pdb" />
-    <None Include="Src\Shaders\Compiled\PBREffect_VSConstantVelocity.inc" />
-    <None Include="Src\Shaders\Compiled\PBREffect_VSConstantVelocity.pdb" />
-    <None Include="Src\Shaders\Compiled\PBREffect_VSConstantVelocityBn.inc" />
-    <None Include="Src\Shaders\Compiled\PBREffect_VSConstantVelocityBn.pdb" />
     <None Include="Src\Shaders\Compiled\PostProcess_PSBloomBlur.inc" />
     <None Include="Src\Shaders\Compiled\PostProcess_PSBloomBlur.pdb" />
     <None Include="Src\Shaders\Compiled\PostProcess_PSBloomCombine.inc" />
@@ -428,8 +391,6 @@
     <None Include="Src\Shaders\Compiled\ToneMap_VSQuad.pdb" />
     <None Include="Src\Shaders\CompileShaders.cmd" />
     <None Include="Src\Shaders\Lighting.fxh" />
-    <None Include="Src\Shaders\PBRCommon.fxh" />
-    <None Include="Src\Shaders\PixelPacking_Velocity.hlsli" />
     <None Include="Src\Shaders\SpriteEffect.fx" />
     <None Include="Src\Shaders\Structures.fxh" />
     <None Include="Src\Shaders\Utilities.fxh" />
@@ -475,25 +436,22 @@
     <None Include="Src\Shaders\PostProcess.fx">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Src\Shaders\ToneMap.fx">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Src\Shaders\PBREffect.fx">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Src\Shaders\DebugEffect.fx">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
+  <PropertyGroup Label="Globals" />
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>DirectXTK</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <SccProjectName>SAK</SccProjectName>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccProvider>SAK</SccProvider>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -566,10 +524,9 @@
       <AdditionalIncludeDirectories>$(ProjectDir)Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <SupportJustMyCode>false</SupportJustMyCode>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -587,10 +544,9 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <SupportJustMyCode>false</SupportJustMyCode>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -602,14 +558,16 @@
       <WarningLevel>EnableAllWarnings</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;_WIN7_PLATFORM_UPDATE;WIN32;NDEBUG;_LIB;_CRT_STDIO_ARBITRARY_WIDE_SPECIFIERS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -623,15 +581,17 @@
       <WarningLevel>EnableAllWarnings</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;_WIN7_PLATFORM_UPDATE;WIN32;NDEBUG;_LIB;_CRT_STDIO_ARBITRARY_WIDE_SPECIFIERS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

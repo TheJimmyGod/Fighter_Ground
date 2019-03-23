@@ -14,8 +14,12 @@
 // For a full-featured DDS file reader, writer, and texture processing pipeline see
 // the 'Texconv' sample and the 'DirectXTex' library.
 //
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248926
 // http://go.microsoft.com/fwlink/?LinkId=248929
@@ -141,49 +145,12 @@ namespace
     };
 
     bool g_WIC2 = false;
-
-    BOOL WINAPI InitializeWICFactory(PINIT_ONCE, PVOID, PVOID *ifactory) noexcept
-    {
-    #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
-        HRESULT hr = CoCreateInstance(
-            CLSID_WICImagingFactory2,
-            nullptr,
-            CLSCTX_INPROC_SERVER,
-            __uuidof(IWICImagingFactory2),
-            ifactory
-        );
-
-        if (SUCCEEDED(hr))
-        {
-            // WIC2 is available on Windows 10, Windows 8.x, and Windows 7 SP1 with KB 2670838 installed
-            g_WIC2 = true;
-            return TRUE;
-        }
-        else
-        {
-            hr = CoCreateInstance(
-                CLSID_WICImagingFactory1,
-                nullptr,
-                CLSCTX_INPROC_SERVER,
-                __uuidof(IWICImagingFactory),
-                ifactory
-            );
-            return SUCCEEDED(hr) ? TRUE : FALSE;
-        }
-    #else
-        return SUCCEEDED(CoCreateInstance(
-            CLSID_WICImagingFactory,
-            nullptr,
-            CLSCTX_INPROC_SERVER,
-            __uuidof(IWICImagingFactory),
-            ifactory)) ? TRUE : FALSE;
-    #endif
-    }
 }
 
 //--------------------------------------------------------------------------------------
 namespace DirectX
 {
+
     bool _IsWIC2()
     {
         return g_WIC2;
@@ -194,11 +161,44 @@ namespace DirectX
         static INIT_ONCE s_initOnce = INIT_ONCE_STATIC_INIT;
 
         IWICImagingFactory* factory = nullptr;
-        (void)InitOnceExecuteOnce(
-            &s_initOnce,
-            InitializeWICFactory,
-            nullptr,
-            reinterpret_cast<LPVOID*>(&factory));
+        InitOnceExecuteOnce(&s_initOnce,
+            [](PINIT_ONCE, PVOID, PVOID *factory) -> BOOL
+            {
+            #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
+                HRESULT hr = CoCreateInstance(
+                    CLSID_WICImagingFactory2,
+                    nullptr,
+                    CLSCTX_INPROC_SERVER,
+                    __uuidof(IWICImagingFactory2),
+                    factory
+                    );
+
+                if ( SUCCEEDED(hr) )
+                {
+                    // WIC2 is available on Windows 10, Windows 8.x, and Windows 7 SP1 with KB 2670838 installed
+                    g_WIC2 = true;
+                    return TRUE;
+                }
+                else
+                {
+                    hr = CoCreateInstance(
+                        CLSID_WICImagingFactory1,
+                        nullptr,
+                        CLSCTX_INPROC_SERVER,
+                        __uuidof(IWICImagingFactory),
+                        factory
+                        );
+                    return SUCCEEDED(hr) ? TRUE : FALSE;
+                }
+            #else
+                return SUCCEEDED( CoCreateInstance(
+                    CLSID_WICImagingFactory,
+                    nullptr,
+                    CLSCTX_INPROC_SERVER,
+                    __uuidof(IWICImagingFactory),
+                    factory) ) ? TRUE : FALSE;
+            #endif
+            }, nullptr, reinterpret_cast<LPVOID*>(&factory));
 
         return factory;
     }
@@ -279,9 +279,6 @@ namespace
         if (FAILED(hr))
             return hr;
 
-        if (maxsize > UINT32_MAX)
-            return E_INVALIDARG;
-
         assert(width > 0 && height > 0);
 
         if (!maxsize)
@@ -343,7 +340,7 @@ namespace
             return hr;
 
         WICPixelFormatGUID convertGUID;
-        memcpy_s(&convertGUID, sizeof(WICPixelFormatGUID), &pixelFormat, sizeof(GUID));
+        memcpy(&convertGUID, &pixelFormat, sizeof(WICPixelFormatGUID));
 
         size_t bpp = 0;
 
@@ -355,14 +352,14 @@ namespace
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
                 if (g_WIC2)
                 {
-                    memcpy_s(&convertGUID, sizeof(WICPixelFormatGUID), &GUID_WICPixelFormat96bppRGBFloat, sizeof(GUID));
+                    memcpy(&convertGUID, &GUID_WICPixelFormat96bppRGBFloat, sizeof(WICPixelFormatGUID));
                     format = DXGI_FORMAT_R32G32B32_FLOAT;
                     bpp = 96;
                 }
                 else
 #endif
                 {
-                    memcpy_s(&convertGUID, sizeof(WICPixelFormatGUID), &GUID_WICPixelFormat128bppRGBAFloat, sizeof(GUID));
+                    memcpy(&convertGUID, &GUID_WICPixelFormat128bppRGBAFloat, sizeof(WICPixelFormatGUID));
                     format = DXGI_FORMAT_R32G32B32A32_FLOAT;
                     bpp = 128;
                 }
@@ -373,7 +370,7 @@ namespace
                 {
                     if (memcmp(&g_WICConvert[i].source, &pixelFormat, sizeof(WICPixelFormatGUID)) == 0)
                     {
-                        memcpy_s(&convertGUID, sizeof(WICPixelFormatGUID), &g_WICConvert[i].target, sizeof(GUID));
+                        memcpy(&convertGUID, &g_WICConvert[i].target, sizeof(WICPixelFormatGUID));
 
                         format = _WICToDXGI(g_WICConvert[i].target);
                         assert(format != DXGI_FORMAT_UNKNOWN);
@@ -384,13 +381,7 @@ namespace
             }
 
             if (format == DXGI_FORMAT_UNKNOWN)
-            {
-                DebugTrace("ERROR: WICTextureLoader does not support all DXGI formats (WIC GUID {%8.8lX-%4.4X-%4.4X-%2.2X%2.2X-%2.2X%2.2X%2.2X%2.2X%2.2X%2.2X}). Consider using DirectXTex.\n",
-                    pixelFormat.Data1, pixelFormat.Data2, pixelFormat.Data3,
-                    pixelFormat.Data4[0], pixelFormat.Data4[1], pixelFormat.Data4[2], pixelFormat.Data4[3],
-                    pixelFormat.Data4[4], pixelFormat.Data4[5], pixelFormat.Data4[6], pixelFormat.Data4[7]);
                 return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
-            }
         }
         else
         {
@@ -398,7 +389,7 @@ namespace
         }
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
-        if ((format == DXGI_FORMAT_R32G32B32_FLOAT) && d3dContext && textureView)
+        if ((format == DXGI_FORMAT_R32G32B32_FLOAT) && d3dContext != 0 && textureView != 0)
         {
             // Special case test for optional device support for autogen mipchains for R32G32B32_FLOAT 
             UINT fmtSupport = 0;
@@ -406,7 +397,7 @@ namespace
             if (FAILED(hr) || !(fmtSupport & D3D11_FORMAT_SUPPORT_MIP_AUTOGEN))
             {
                 // Use R32G32B32A32_FLOAT instead which is required for Feature Level 10.0 and up
-                memcpy_s(&convertGUID, sizeof(WICPixelFormatGUID), &GUID_WICPixelFormat128bppRGBAFloat, sizeof(GUID));
+                memcpy(&convertGUID, &GUID_WICPixelFormat128bppRGBAFloat, sizeof(WICPixelFormatGUID));
                 format = DXGI_FORMAT_R32G32B32A32_FLOAT;
                 bpp = 128;
             }
@@ -480,20 +471,14 @@ namespace
         if (FAILED(hr) || !(support & D3D11_FORMAT_SUPPORT_TEXTURE2D))
         {
             // Fallback to RGBA 32-bit format which is supported by all devices
-            memcpy_s(&convertGUID, sizeof(WICPixelFormatGUID), &GUID_WICPixelFormat32bppRGBA, sizeof(GUID));
+            memcpy(&convertGUID, &GUID_WICPixelFormat32bppRGBA, sizeof(WICPixelFormatGUID));
             format = DXGI_FORMAT_R8G8B8A8_UNORM;
             bpp = 32;
         }
 
         // Allocate temporary memory for image
-        uint64_t rowBytes = (uint64_t(twidth) * uint64_t(bpp) + 7u) / 8u;
-        uint64_t numBytes = rowBytes * uint64_t(height);
-
-        if (rowBytes > UINT32_MAX || numBytes > UINT32_MAX)
-            return HRESULT_FROM_WIN32(ERROR_ARITHMETIC_OVERFLOW);
-
-        auto rowPitch = static_cast<size_t>(rowBytes);
-        auto imageSize = static_cast<size_t>(numBytes);
+        size_t rowPitch = (twidth * bpp + 7) / 8;
+        size_t imageSize = rowPitch * theight;
 
         std::unique_ptr<uint8_t[]> temp(new (std::nothrow) uint8_t[imageSize]);
         if (!temp)
@@ -505,7 +490,7 @@ namespace
             && theight == height)
         {
             // No format conversion or resize needed
-            hr = frame->CopyPixels(nullptr, static_cast<UINT>(rowPitch), static_cast<UINT>(imageSize), temp.get());
+            hr = frame->CopyPixels(0, static_cast<UINT>(rowPitch), static_cast<UINT>(imageSize), temp.get());
             if (FAILED(hr))
                 return hr;
         }
@@ -533,7 +518,7 @@ namespace
             if (memcmp(&convertGUID, &pfScaler, sizeof(GUID)) == 0)
             {
                 // No format conversion needed
-                hr = scaler->CopyPixels(nullptr, static_cast<UINT>(rowPitch), static_cast<UINT>(imageSize), temp.get());
+                hr = scaler->CopyPixels(0, static_cast<UINT>(rowPitch), static_cast<UINT>(imageSize), temp.get());
                 if (FAILED(hr))
                     return hr;
             }
@@ -555,7 +540,7 @@ namespace
                 if (FAILED(hr))
                     return hr;
 
-                hr = FC->CopyPixels(nullptr, static_cast<UINT>(rowPitch), static_cast<UINT>(imageSize), temp.get());
+                hr = FC->CopyPixels(0, static_cast<UINT>(rowPitch), static_cast<UINT>(imageSize), temp.get());
                 if (FAILED(hr))
                     return hr;
             }
@@ -583,14 +568,14 @@ namespace
             if (FAILED(hr))
                 return hr;
 
-            hr = FC->CopyPixels(nullptr, static_cast<UINT>(rowPitch), static_cast<UINT>(imageSize), temp.get());
+            hr = FC->CopyPixels(0, static_cast<UINT>(rowPitch), static_cast<UINT>(imageSize), temp.get());
             if (FAILED(hr))
                 return hr;
         }
 
         // See if format is supported for auto-gen mipmaps (varies by feature level)
         bool autogen = false;
-        if (d3dContext && textureView) // Must have context and shader-view to auto generate mipmaps
+        if (d3dContext != 0 && textureView != 0) // Must have context and shader-view to auto generate mipmaps
         {
             UINT fmtSupport = 0;
             hr = d3dDevice->CheckFormatSupport(format, &fmtSupport);
@@ -634,9 +619,9 @@ namespace
 
         ID3D11Texture2D* tex = nullptr;
         hr = d3dDevice->CreateTexture2D(&desc, (autogen) ? nullptr : &initData, &tex);
-        if (SUCCEEDED(hr) && tex)
+        if (SUCCEEDED(hr) && tex != 0)
         {
-            if (textureView)
+            if (textureView != 0)
             {
                 D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
                 SRVDesc.Format = desc.Format;
@@ -653,7 +638,7 @@ namespace
 
                 if (autogen)
                 {
-                    assert(d3dContext != nullptr);
+                    assert(d3dContext != 0);
 
 #if defined(_XBOX_ONE) && defined(_TITLE)
                     ID3D11Texture2D *pStaging = nullptr;
@@ -678,7 +663,7 @@ namespace
                 }
             }
 
-            if (texture)
+            if (texture != 0)
             {
                 *texture = tex;
             }
@@ -709,7 +694,7 @@ HRESULT DirectX::CreateWICTextureFromMemory(ID3D11Device* d3dDevice,
 
 _Use_decl_annotations_
 #if defined(_XBOX_ONE) && defined(_TITLE)
-    HRESULT DirectX::CreateWICTextureFromMemory(ID3D11DeviceX* d3dDevice,
+    HRESULT DirectX::CreateWICTextureFromMemory( ID3D11DeviceX* d3dDevice,
         ID3D11DeviceContextX* d3dContext,
 #else
     HRESULT DirectX::CreateWICTextureFromMemory(ID3D11Device* d3dDevice,
@@ -773,7 +758,7 @@ HRESULT DirectX::CreateWICTextureFromMemoryEx(ID3D11Device* d3dDevice,
 
     // Initialize WIC
     ComPtr<IWICBitmapDecoder> decoder;
-    hr = pWIC->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf());
+    hr = pWIC->CreateDecoderFromStream(stream.Get(), 0, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf());
     if (FAILED(hr))
         return hr;
 
@@ -792,12 +777,12 @@ HRESULT DirectX::CreateWICTextureFromMemoryEx(ID3D11Device* d3dDevice,
     if (FAILED(hr))
         return hr;
 
-    if (texture && *texture)
+    if (texture != 0 && *texture != 0)
     {
         SetDebugObjectName(*texture, "WICTextureLoader");
     }
 
-    if (textureView && *textureView)
+    if (textureView != 0 && *textureView != 0)
     {
         SetDebugObjectName(*textureView, "WICTextureLoader");
     }
@@ -807,7 +792,7 @@ HRESULT DirectX::CreateWICTextureFromMemoryEx(ID3D11Device* d3dDevice,
 
 _Use_decl_annotations_
 #if defined(_XBOX_ONE) && defined(_TITLE)
-    HRESULT DirectX::CreateWICTextureFromMemoryEx(ID3D11DeviceX* d3dDevice,
+    HRESULT DirectX::CreateWICTextureFromMemoryEx( ID3D11DeviceX* d3dDevice,
             ID3D11DeviceContextX* d3dContext,
 #else
     HRESULT DirectX::CreateWICTextureFromMemoryEx(ID3D11Device* d3dDevice,
@@ -858,7 +843,7 @@ _Use_decl_annotations_
 
     // Initialize WIC
     ComPtr<IWICBitmapDecoder> decoder;
-    hr = pWIC->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf());
+    hr = pWIC->CreateDecoderFromStream(stream.Get(), 0, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf());
     if (FAILED(hr))
         return hr;
 
@@ -877,12 +862,12 @@ _Use_decl_annotations_
     if (FAILED(hr))
         return hr;
 
-    if (texture && *texture)
+    if (texture != 0 && *texture != 0)
     {
         SetDebugObjectName(*texture, "WICTextureLoader");
     }
 
-    if (textureView && *textureView)
+    if (textureView != 0 && *textureView != 0)
     {
         SetDebugObjectName(*textureView, "WICTextureLoader");
     }
@@ -892,20 +877,20 @@ _Use_decl_annotations_
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-HRESULT DirectX::CreateWICTextureFromFile(ID3D11Device* d3dDevice,
-                                          const wchar_t* fileName,
-                                          ID3D11Resource** texture,
-                                          ID3D11ShaderResourceView** textureView,
-                                          size_t maxsize)
+HRESULT DirectX::CreateWICTextureFromFile( ID3D11Device* d3dDevice,
+                                           const wchar_t* fileName,
+                                           ID3D11Resource** texture,
+                                           ID3D11ShaderResourceView** textureView,
+                                           size_t maxsize )
 {
-    return CreateWICTextureFromFileEx(d3dDevice, fileName, maxsize,
-                                      D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, WIC_LOADER_DEFAULT,
-                                      texture, textureView);
+    return CreateWICTextureFromFileEx( d3dDevice, fileName, maxsize,
+                                       D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, WIC_LOADER_DEFAULT,
+                                       texture, textureView );
 }
 
 _Use_decl_annotations_
 #if defined(_XBOX_ONE) && defined(_TITLE)
-    HRESULT DirectX::CreateWICTextureFromFile(ID3D11DeviceX* d3dDevice,
+    HRESULT DirectX::CreateWICTextureFromFile( ID3D11DeviceX* d3dDevice,
         ID3D11DeviceContextX* d3dContext,
 #else
     HRESULT DirectX::CreateWICTextureFromFile(ID3D11Device* d3dDevice,
@@ -951,7 +936,7 @@ HRESULT DirectX::CreateWICTextureFromFileEx(ID3D11Device* d3dDevice,
 
     // Initialize WIC
     ComPtr<IWICBitmapDecoder> decoder;
-    HRESULT hr = pWIC->CreateDecoderFromFilename(fileName, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf());
+    HRESULT hr = pWIC->CreateDecoderFromFilename(fileName, 0, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf());
     if (FAILED(hr))
         return hr;
 
@@ -968,10 +953,10 @@ HRESULT DirectX::CreateWICTextureFromFileEx(ID3D11Device* d3dDevice,
         usage, bindFlags, cpuAccessFlags, miscFlags, loadFlags,
         texture, textureView);
 
-#if !defined(NO_D3D11_DEBUG_NAME) && (defined(_DEBUG) || defined(PROFILE))
+#if !defined(NO_D3D11_DEBUG_NAME) && ( defined(_DEBUG) || defined(PROFILE) )
     if (SUCCEEDED(hr))
     {
-        if (texture || textureView)
+        if (texture != 0 || textureView != 0)
         {
 #if defined(_XBOX_ONE) && defined(_TITLE)
             const wchar_t* pstrName = wcsrchr(fileName, '\\');
@@ -983,24 +968,24 @@ HRESULT DirectX::CreateWICTextureFromFileEx(ID3D11Device* d3dDevice,
             {
                 pstrName++;
             }
-            if (texture && *texture)
+            if (texture != 0 && *texture != 0)
             {
                 (*texture)->SetName(pstrName);
             }
-            if (textureView && *textureView)
+            if (textureView != 0 && *textureView != 0)
             {
                 (*textureView)->SetName(pstrName);
             }
 #else
             CHAR strFileA[MAX_PATH];
-            int result = WideCharToMultiByte(CP_UTF8,
+            int result = WideCharToMultiByte(CP_ACP,
                 WC_NO_BEST_FIT_CHARS,
                 fileName,
                 -1,
                 strFileA,
                 MAX_PATH,
                 nullptr,
-                nullptr
+                FALSE
             );
             if (result > 0)
             {
@@ -1014,7 +999,7 @@ HRESULT DirectX::CreateWICTextureFromFileEx(ID3D11Device* d3dDevice,
                     pstrName++;
                 }
 
-                if (texture && *texture)
+                if (texture != 0 && *texture != 0)
                 {
                     (*texture)->SetPrivateData(WKPDID_D3DDebugObjectName,
                         static_cast<UINT>(strnlen_s(pstrName, MAX_PATH)),
@@ -1022,7 +1007,7 @@ HRESULT DirectX::CreateWICTextureFromFileEx(ID3D11Device* d3dDevice,
                     );
                 }
 
-                if (textureView && *textureView)
+                if (textureView != 0 && *textureView != 0)
                 {
                     (*textureView)->SetPrivateData(WKPDID_D3DDebugObjectName,
                         static_cast<UINT>(strnlen_s(pstrName, MAX_PATH)),
@@ -1040,7 +1025,7 @@ HRESULT DirectX::CreateWICTextureFromFileEx(ID3D11Device* d3dDevice,
 
 _Use_decl_annotations_
 #if defined(_XBOX_ONE) && defined(_TITLE)
-    HRESULT DirectX::CreateWICTextureFromFileEx(ID3D11DeviceX* d3dDevice,
+    HRESULT DirectX::CreateWICTextureFromFileEx( ID3D11DeviceX* d3dDevice,
         ID3D11DeviceContextX* d3dContext,
 #else
     HRESULT DirectX::CreateWICTextureFromFileEx(ID3D11Device* d3dDevice,
@@ -1074,7 +1059,7 @@ _Use_decl_annotations_
 
     // Initialize WIC
     ComPtr<IWICBitmapDecoder> decoder;
-    HRESULT hr = pWIC->CreateDecoderFromFilename(fileName, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf());
+    HRESULT hr = pWIC->CreateDecoderFromFilename(fileName, 0, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf());
     if (FAILED(hr))
         return hr;
 
@@ -1091,10 +1076,10 @@ _Use_decl_annotations_
         usage, bindFlags, cpuAccessFlags, miscFlags, loadFlags,
         texture, textureView);
 
-#if !defined(NO_D3D11_DEBUG_NAME) && (defined(_DEBUG) || defined(PROFILE))
+#if !defined(NO_D3D11_DEBUG_NAME) && ( defined(_DEBUG) || defined(PROFILE) )
     if (SUCCEEDED(hr))
     {
-        if (texture || textureView)
+        if (texture != 0 || textureView != 0)
         {
 #if defined(_XBOX_ONE) && defined(_TITLE)
             const wchar_t* pstrName = wcsrchr(fileName, '\\');
@@ -1106,24 +1091,24 @@ _Use_decl_annotations_
             {
                 pstrName++;
             }
-            if (texture && *texture)
+            if (texture != 0 && *texture != 0)
             {
                 (*texture)->SetName(pstrName);
             }
-            if (textureView && *textureView)
+            if (textureView != 0 && *textureView != 0)
             {
                 (*textureView)->SetName(pstrName);
             }
 #else
             CHAR strFileA[MAX_PATH];
-            int result = WideCharToMultiByte(CP_UTF8,
+            int result = WideCharToMultiByte(CP_ACP,
                 WC_NO_BEST_FIT_CHARS,
                 fileName,
                 -1,
                 strFileA,
                 MAX_PATH,
                 nullptr,
-                nullptr
+                FALSE
             );
             if (result > 0)
             {
@@ -1137,7 +1122,7 @@ _Use_decl_annotations_
                     pstrName++;
                 }
 
-                if (texture && *texture)
+                if (texture != 0 && *texture != 0)
                 {
                     (*texture)->SetPrivateData(WKPDID_D3DDebugObjectName,
                         static_cast<UINT>(strnlen_s(pstrName, MAX_PATH)),
@@ -1145,7 +1130,7 @@ _Use_decl_annotations_
                     );
                 }
 
-                if (textureView && *textureView)
+                if (textureView != 0 && *textureView != 0)
                 {
                     (*textureView)->SetPrivateData(WKPDID_D3DDebugObjectName,
                         static_cast<UINT>(strnlen_s(pstrName, MAX_PATH)),

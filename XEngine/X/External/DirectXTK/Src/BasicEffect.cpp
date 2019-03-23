@@ -1,8 +1,12 @@
 //--------------------------------------------------------------------------------------
 // File: BasicEffect.cpp
 //
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
 //--------------------------------------------------------------------------------------
@@ -34,13 +38,13 @@ struct BasicEffectConstants
     XMMATRIX worldViewProj;
 };
 
-static_assert((sizeof(BasicEffectConstants) % 16) == 0, "CB size not padded correctly");
+static_assert( ( sizeof(BasicEffectConstants) % 16 ) == 0, "CB size not padded correctly" );
 
 
 // Traits type describes our characteristics to the EffectBase template.
 struct BasicEffectTraits
 {
-    using ConstantBufferType = BasicEffectConstants;
+    typedef BasicEffectConstants ConstantBufferType;
 
     static const int VertexShaderCount = 32;
     static const int PixelShaderCount = 10;
@@ -378,7 +382,6 @@ const int EffectBase<BasicEffectTraits>::PixelShaderIndices[] =
 
 
 // Global pool of per-device BasicEffect resources.
-template<>
 SharedResourcePool<ID3D11Device*, EffectBase<BasicEffectTraits>::DeviceResources> EffectBase<BasicEffectTraits>::deviceResourcesPool;
 
 
@@ -476,20 +479,20 @@ void BasicEffect::Impl::Apply(_In_ ID3D11DeviceContext* deviceContext)
 
 // Public constructor.
 BasicEffect::BasicEffect(_In_ ID3D11Device* device)
-  : pImpl(std::make_unique<Impl>(device))
+  : pImpl(new Impl(device))
 {
 }
 
 
 // Move constructor.
-BasicEffect::BasicEffect(BasicEffect&& moveFrom) noexcept
+BasicEffect::BasicEffect(BasicEffect&& moveFrom)
   : pImpl(std::move(moveFrom.pImpl))
 {
 }
 
 
 // Move assignment.
-BasicEffect& BasicEffect::operator= (BasicEffect&& moveFrom) noexcept
+BasicEffect& BasicEffect::operator= (BasicEffect&& moveFrom)
 {
     pImpl = std::move(moveFrom.pImpl);
     return *this;

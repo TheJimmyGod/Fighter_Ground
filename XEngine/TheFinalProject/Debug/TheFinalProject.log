@@ -1,0 +1,14 @@
+﻿  Boss.cpp
+  EnemyBullet.cpp
+  EnemyBullet2.cpp
+  MeleeEnemy.cpp
+  Energy1.cpp
+  Energy2.cpp
+  SkyEnemy.cpp
+  Leaderboard.cpp
+  TheFighter.cpp
+  WinMain.cpp
+c:\users\1820109\desktop\xengine_game\xengine\thefinalproject\winmain.cpp(154): warning C4553: '==': result of expression not used; did you intend '='?
+c:\users\1820109\desktop\xengine_game\xengine\thefinalproject\winmain.cpp(276): warning C4553: '==': result of expression not used; did you intend '='?
+  Generating Code...
+  TheFinalProject.vcxproj -> C:\Users\1820109\Desktop\XEngine_Game\XEngine\Debug\TheFinalProject.exe

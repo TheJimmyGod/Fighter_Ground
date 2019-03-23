@@ -1,8 +1,12 @@
 //--------------------------------------------------------------------------------------
 // File: ToneMapPostProcess.cpp
 //
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
 //--------------------------------------------------------------------------------------
@@ -163,10 +167,7 @@ namespace
     public:
         DeviceResources(_In_ ID3D11Device* device)
             : stateObjects(device),
-            mDevice(device),
-            mVertexShader{},
-            mPixelShaders{},
-            mMutex{}
+            mDevice(device)
         { }
 
         // Gets or lazily creates the vertex shader.
@@ -252,15 +253,15 @@ SharedResourcePool<ID3D11Device*, DeviceResources> ToneMapPostProcess::Impl::dev
 
 // Constructor.
 ToneMapPostProcess::Impl::Impl(_In_ ID3D11Device* device)
-    : constants{},
-    linearExposure(1.f),
+    : linearExposure(1.f),
     paperWhiteNits(200.f),
     op(None),
     func(Linear),
     mrt(false),
     mDirtyFlags(INT_MAX),
     mConstantBuffer(device),
-    mDeviceResources(deviceResourcesPool.DemandCreate(device))
+    mDeviceResources(deviceResourcesPool.DemandCreate(device)),
+    constants{}
 {
     if (device->GetFeatureLevel() < D3D_FEATURE_LEVEL_10_0)
     {
@@ -329,10 +330,9 @@ void ToneMapPostProcess::Impl::Process(_In_ ID3D11DeviceContext* deviceContext, 
     }
 
     // Draw quad.
-    deviceContext->IASetInputLayout(nullptr);
-    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-    deviceContext->Draw(3, 0);
+    deviceContext->Draw(4, 0);
 }
 
 
@@ -349,20 +349,20 @@ int ToneMapPostProcess::Impl::GetCurrentShaderPermutation() const
 
 // Public constructor.
 ToneMapPostProcess::ToneMapPostProcess(_In_ ID3D11Device* device)
-  : pImpl(std::make_unique<Impl>(device))
+  : pImpl(new Impl(device))
 {
 }
 
 
 // Move constructor.
-ToneMapPostProcess::ToneMapPostProcess(ToneMapPostProcess&& moveFrom) noexcept
+ToneMapPostProcess::ToneMapPostProcess(ToneMapPostProcess&& moveFrom)
   : pImpl(std::move(moveFrom.pImpl))
 {
 }
 
 
 // Move assignment.
-ToneMapPostProcess& ToneMapPostProcess::operator= (ToneMapPostProcess&& moveFrom) noexcept
+ToneMapPostProcess& ToneMapPostProcess::operator= (ToneMapPostProcess&& moveFrom)
 {
     pImpl = std::move(moveFrom.pImpl);
     return *this;

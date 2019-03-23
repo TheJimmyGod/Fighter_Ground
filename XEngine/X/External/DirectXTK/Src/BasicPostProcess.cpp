@@ -1,8 +1,12 @@
 //--------------------------------------------------------------------------------------
 // File: BasicPostProcess.cpp
 //
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
 //--------------------------------------------------------------------------------------
@@ -100,10 +104,7 @@ namespace
     public:
         DeviceResources(_In_ ID3D11Device* device)
             : stateObjects(device),
-            mDevice(device),
-            mVertexShader{},
-            mPixelShaders{},
-            mMutex{}
+            mDevice(device)
         { }
 
         // Gets or lazily creates the vertex shader.
@@ -158,8 +159,8 @@ public:
     void SetDirtyFlag() { mDirtyFlags = INT_MAX; }
 
     // Fields.
-    PostProcessConstants                    constants;
     BasicPostProcess::Effect                fx;
+    PostProcessConstants                    constants;
     ComPtr<ID3D11ShaderResourceView>        texture;
     unsigned                                texWidth;
     unsigned                                texHeight;
@@ -193,8 +194,7 @@ SharedResourcePool<ID3D11Device*, DeviceResources> BasicPostProcess::Impl::devic
 
 // Constructor.
 BasicPostProcess::Impl::Impl(_In_ ID3D11Device* device)
-    : constants{},
-    fx(BasicPostProcess::Copy),
+    : fx(BasicPostProcess::Copy),
     texWidth(0),
     texHeight(0),
     guassianMultiplier(1.f),
@@ -205,7 +205,8 @@ BasicPostProcess::Impl::Impl(_In_ ID3D11Device* device)
     mUseConstants(false),
     mDirtyFlags(INT_MAX),
     mConstantBuffer(device),
-    mDeviceResources(deviceResourcesPool.DemandCreate(device))
+    mDeviceResources(deviceResourcesPool.DemandCreate(device)),
+    constants{}
 {
     if (device->GetFeatureLevel() < D3D_FEATURE_LEVEL_10_0)
     {
@@ -301,10 +302,9 @@ void BasicPostProcess::Impl::Process(_In_ ID3D11DeviceContext* deviceContext, st
     }
 
     // Draw quad.
-    deviceContext->IASetInputLayout(nullptr);
-    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-    deviceContext->Draw(3, 0);
+    deviceContext->Draw(4, 0);
 }
 
 
@@ -312,7 +312,7 @@ void BasicPostProcess::Impl::DownScale2x2()
 {
     mUseConstants = true;
 
-    if (!texWidth || !texHeight)
+    if ( !texWidth || !texHeight)
     {
         throw std::exception("Call SetSourceTexture before setting post-process effect");
     }
@@ -332,6 +332,7 @@ void BasicPostProcess::Impl::DownScale2x2()
             ++ptr;
         }
     }
+
 }
 
 
@@ -409,12 +410,10 @@ void BasicPostProcess::Impl::GaussianBlur5x5(float multiplier)
     // blur kernels add to 1.0f to ensure that the intensity of the image isn't
     // changed when the blur occurs. An optional multiplier variable is used to
     // add or remove image intensity during the blur.
-    XMVECTOR vtw = XMVectorReplicate(totalWeight);
-    XMVECTOR vm = XMVectorReplicate(multiplier);
     for (size_t i = 0; i < index; ++i)
     {
-        weights[i] = XMVectorDivide(weights[i], vtw);
-        weights[i] = XMVectorMultiply(weights[i], vm);
+        weights[i] /= totalWeight;
+        weights[i] *= multiplier;
     }
 }
 
@@ -467,20 +466,20 @@ void  BasicPostProcess::Impl::Bloom(bool horizontal, float size, float brightnes
 
 // Public constructor.
 BasicPostProcess::BasicPostProcess(_In_ ID3D11Device* device)
-  : pImpl(std::make_unique<Impl>(device))
+  : pImpl(new Impl(device))
 {
 }
 
 
 // Move constructor.
-BasicPostProcess::BasicPostProcess(BasicPostProcess&& moveFrom) noexcept
+BasicPostProcess::BasicPostProcess(BasicPostProcess&& moveFrom)
   : pImpl(std::move(moveFrom.pImpl))
 {
 }
 
 
 // Move assignment.
-BasicPostProcess& BasicPostProcess::operator= (BasicPostProcess&& moveFrom) noexcept
+BasicPostProcess& BasicPostProcess::operator= (BasicPostProcess&& moveFrom)
 {
     pImpl = std::move(moveFrom.pImpl);
     return *this;
