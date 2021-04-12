@@ -1,0 +1,32 @@
+﻿  FW1Precompiled.cpp
+  CFW1ColorRGBA.cpp
+  CFW1ColorRGBAInterface.cpp
+  CFW1DWriteRenderTarget.cpp
+  CFW1DWriteRenderTargetInterface.cpp
+  CFW1Factory.cpp
+  CFW1FactoryInterface.cpp
+  CFW1FontWrapper.cpp
+  CFW1FontWrapperInterface.cpp
+  CFW1GlyphAtlas.cpp
+  CFW1GlyphAtlasInterface.cpp
+  CFW1GlyphProvider.cpp
+  CFW1GlyphProviderInterface.cpp
+  CFW1GlyphRenderStates.cpp
+c:\users\jimmy\desktop\xengine_game\xengine\x\external\fw1fontwrapper\source\cfw1glyphrenderstates.cpp(682): warning C4456: declaration of 'hResult' hides previous local declaration
+  c:\users\jimmy\desktop\xengine_game\xengine\x\external\fw1fontwrapper\source\cfw1glyphrenderstates.cpp(654): note: see declaration of 'hResult'
+  CFW1GlyphRenderStatesInterface.cpp
+  CFW1GlyphSheet.cpp
+  CFW1GlyphSheetInterface.cpp
+  CFW1GlyphVertexDrawer.cpp
+  CFW1GlyphVertexDrawerInterface.cpp
+  CFW1StateSaver.cpp
+  CFW1TextGeometry.cpp
+  Generating Code...
+  Compiling...
+  CFW1TextGeometryInterface.cpp
+  CFW1TextRenderer.cpp
+  CFW1TextRendererInterface.cpp
+  FW1FontWrapper.cpp
+  Generating Code...
+     Creating library C:\Users\Jimmy\Desktop\XEngine_Game\XEngine\Debug\x64\FW1FontWrapper.lib and object C:\Users\Jimmy\Desktop\XEngine_Game\XEngine\Debug\x64\FW1FontWrapper.exp
+  FW1FontWrapper.vcxproj -> C:\Users\Jimmy\Desktop\XEngine_Game\XEngine\Debug\x64\FW1FontWrapper.dll
